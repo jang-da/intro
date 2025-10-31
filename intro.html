@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GSAP 상하 분리 인트로 (가로 텍스트 이동)</title>
+    <!-- Tailwind CSS CDN --><script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font (Inter) --><link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;700&display=swap" rel="stylesheet">
+    <!-- GSAP CDN --><script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+        /* Tailwind CSS를 보완하기 위한 기본 스타일 */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* 로딩 바가 왼쪽에서 오른쪽으로 채워지도록 설정 */
+        #loadingBar {
+            transform-origin: left;
+            transform: scaleX(0);
+        }
+    </style>
+</head>
+<body class="bg-gray-900">
+
+    <!-- 
+      메인 컨테이너
+      - relative: 자식 absolute 요소들의 기준점
+      - w-full h-screen: 전체 화면 크기
+      - overflow-hidden: 패널이 화면 밖으로 나갈 때 스크롤바가 생기지 않도록 함
+    --><div class="relative w-full h-screen overflow-hidden flex items-center justify-center">
+        
+        <!-- 
+          메인 콘텐츠 래퍼 (Z-index: 10)
+          - 애니메이션 패널(Z-index: 20)보다 뒤에 위치
+        --><div class="z-10 text-center">
+            <div class="py-2">
+                <h1 class="text-5xl md:text-8xl font-bold text-white">
+                    <span class="inline-block">GSAP Timeline</span>
+                </h1>
+            </div>
+            <div class="py-1">
+                <h2 class="text-2xl md:text-5xl font-light text-gray-300">
+                    <span class="inline-block">Vertical Intro</span>
+                </h2>
+            </div>
+        </div>
+        
+        <!-- 
+          슬라이딩 패널
+          - absolute: 부모(메인 컨테이너)를 기준으로 위치
+        --><!-- 상단 패널 (Z-index: 20) --><!-- 
+          - 텍스트를 다시 포함하고, flex, overflow-hidden 등 클래스 복원
+        --><div id="panelTop" class="absolute top-0 left-0 w-full h-1/2 bg-teal-500 z-20 flex items-end justify-center overflow-hidden pb-8">
+            <!-- 
+              애니메이션 텍스트
+              - 상단 패널 내부로 다시 이동
+            -->
+            <!-- 
+              폰트 크기 수정: text-4xl md:text-7xl -> text-2xl (24px)
+            -->
+            <div class="flex items-center space-x-4 text-2xl font-bold">
+                <span id="codeText" class="text-white">CODE</span>
+                <span id="slashText" class="text-gray-200">/</span>
+                <span id="artistText" class="text-white">ARTIST</span>
+            </div>
+        </div>
+        
+        <!-- 하단 패널 (Z-index: 20) -->
+        <div id="panelBottom" class="absolute bottom-0 left-0 w-full h-1/2 bg-teal-500 z-20 flex items-end justify-center pb-4">
+            <!-- 하단 퍼센트 텍스트 -->
+            <div id="loadingPercentage" class="text-sm font-mono text-white/50">(0%)</div>
+        </div>
+
+        <!-- 로딩 바 컨테이너 (Z-index: 30) -->
+        <div id="loadingContainer" class="absolute top-1/2 left-0 w-full z-30">
+            <!-- 로딩 바 트랙 -->
+            <div class="h-[1px] w-full bg-black/20"></div>
+            <!-- 실제 움직이는 로딩 바 -->
+            <div id="loadingBar" class="absolute top-0 left-0 h-[1px] w-full bg-white"></div>
+        </div>
+    </div>
+
+    <script>
+        // DOM 콘텐츠가 모두 로드되면 스크립트 실행
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            // 1. 요소들의 초기 상태 설정
+            gsap.set("#panelTop", { yPercent: 0 });
+            gsap.set("#panelBottom", { yPercent: 0 });
+
+            // 상단 패널 내부 텍스트들의 초기 상태 설정 (투명하고 중앙에 위치)
+            gsap.set(["#codeText", "#slashText", "#artistText"], { opacity: 0 }); // 모든 텍스트 초기 투명
+            gsap.set(["#loadingContainer", "#loadingPercentage"], { opacity: 0 }); // 로딩 요소들 초기 투명
+            
+            // 텍스트 이동 거리를 동적으로 계산하기 위해 요소 참조
+            const panelTop = document.getElementById('panelTop');
+            const codeText = document.getElementById('codeText');
+            const artistText = document.getElementById('artistText');
+
+            // 2. GSAP 타임라인 생성
+            const tl = gsap.timeline();
+
+            
+            // 3. 타임라인에 애니메이션 추가
+            
+            // (1) 텍스트가 페이드인 되면서 중앙에 나타나는 애니메이션
+            tl.to(["#codeText", "#slashText", "#artistText"], {
+                duration: 0.8,
+                opacity: 1,
+                ease: "power2.out"
+            });
+
+            // (1.5) 텍스트 페이드인과 동시에 로딩 UI 나타나기
+            tl.to(["#loadingContainer", "#loadingPercentage"], {
+                opacity: 1,
+                duration: 0.8
+            }, "<");
+
+            // (2) CODE와 ARTIST 텍스트가 좌우 가장자리로 이동하며 사라지는 반응형 애니메이션
+            //     "-=0.4" : 이전 텍스트 페이드인 애니메이션이 끝나기 0.4초 전에 시작
+            tl.to(codeText, {
+                duration: 1,
+                x: () => {
+                    const panelWidth = panelTop.offsetWidth;
+                    const textWidth = codeText.offsetWidth;
+                    const padding = 64; // 왼쪽에 둘 여백
+                    // (패널 너비의 절반) - (텍스트 너비의 절반) - 여백
+                    return -(panelWidth / 2 - textWidth / 2 - padding);
+                },
+                ease: "power3.inOut"
+            }, "-=0.4"); 
+
+            tl.to(artistText, {
+                duration: 1,
+                x: () => {
+                    const panelWidth = panelTop.offsetWidth;
+                    const textWidth = artistText.offsetWidth;
+                    const padding = 64; // 오른쪽에 둘 여백
+                    // (패널 너비의 절반) - (텍스트 너비의 절반) - 여백
+                    return panelWidth / 2 - textWidth / 2 - padding;
+                },
+                ease: "power3.inOut"
+            }, "<"); // 이전 CODE 애니메이션과 동시에 시작
+            
+            // (3) 로딩 애니메이션 (숫자와 바)
+            const counter = { value: 0 };
+            tl.to(counter, {
+                value: 100,
+                duration: 1,
+                ease: 'power1.inOut',
+                onUpdate: () => {
+                    document.getElementById('loadingPercentage').textContent = `(${Math.round(counter.value)}%)`;
+                }
+            }, "<"); // 텍스트 이동과 동시에 시작
+
+            tl.to("#loadingBar", {
+                scaleX: 1,
+                duration: 1,
+                ease: "power1.inOut"
+            }, "<"); // 카운터와 동시에 시작
+
+            // (4) 패널과 로딩 UI가 함께 사라지는 애니메이션
+            tl.to(["#panelTop", "#panelBottom", "#loadingContainer"], {
+                duration: 1.2,
+                yPercent: (i) => (i === 0 ? -100 : 100), // panelTop은 위로, 나머지는 아래로 이동
+                ease: "power3.inOut"
+            }, "+=0.3"); // 로딩 바 애니메이션이 끝난 후 0.3초 뒤에 시작
+        });
+    </script>
+
+</body>
+</html>

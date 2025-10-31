@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>물결 파동 애니메이션</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden; /* 스크롤바 제거 */
+    }
+    #app {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    #ripple-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 10; /* #app div 보다 위에 있도록 설정 */
+    }
+    /* content.html 최적화를 위한 CSS 클래스 */
+    .c0{color:#B9D0D6} .c1{color:#B8D0D6} .c2{color:#B7CFD5} .c3{color:#B7CFD6} .c4{color:#BCD3D9}
+    .c5{color:#B8CFD5} .c6{color:#B8D0D5} .c7{color:#B6CED4} .c8{color:#B9D2D8} .c9{color:#BAD1D7}
+    .c10{color:#BBD2D8} .c11{color:#B3CCD3} .c12{color:#B2CBD2} .c13{color:#B1CBD2} .c14{color:#B4CDD4}
+    .c15{color:#BAD2D8} .c16{color:#BAD0D6} .c17{color:#B5CDD4} .c18{color:#B2CCD2} .c19{color:#B8D1D7}
+    .c20{color:#B5CED4} .c21{color:#B5CED5} .c22{color:#B6CFD5} .c23{color:#B7D0D6} .c24{color:#B9CFD5}
+    .c25{color:#BBD1D7} .c26{color:#BBD1D6} .c27{color:#B3CDD3} .c28{color:#B6CED5} .c29{color:#B9D1D8}
+    .c30{color:#B8CFD6} .c31{color:#B2CCD3} .c32{color:#BCD2D7} .c33{color:#B4CED4} .c34{color:#BDD3D8}
+    .c35{color:#B6CFD6} .c36{color:#BDD2D8} .c37{color:#B4CDD4} .c38{color:#BDD3D9} .c39{color:#B8D0D7}
+    .c40{color:#B1CBD2} .c41{color:#BCD3D8} .c42{color:#B2CBD2} .c43{color:#B6CED4} .c44{color:#B8D1D7}
+ar .c45{color:#C3DCE2} .c46{color:#C2DBE2} .c47{color:#C1DBE1} .c48{color:#BED9E0} .c49{color:#BCD8DF}
+    .c50{color:#BDD8DF} .c51{color:#C0DAE1} .c52{color:#C4DDE3} .c53{color:#BFDAE0} .c54{color:#BFD9E0}
+    .c55{color:#C2DCE2} .c56{color:#C5DDE3} .c57{color:#BDD8E0} .c58{color:#BED9E0} .c59{color:#C4DCE3}
+    .c60{color:#C0DAE1} .c61{color:#C6DEE4} .c62{color:#BFDAE1} .c63{color:#C1DBE1} .c64{color:#C7DEE4}
+    .c65{color:#C8DFE5} .c66{color:#CCE1E7} .c67{color:#D7E8ED} .c68{color:#D1E0E4} .c69{color:#CFE0E4}
+    .c70{color:#C1D5DA} .c71{color:#BFD4D9} .c72{color:#DEE9ED} .c73{color:#DEE8EC} .c74{color:#D4E5EA}
+    .c75{color:#E5EFF3} .c76{color:#DDEBEF} .c77{color:#C0D5DA} .c78{color:#BED4DA} .c79{color:#D1E0E4}
+    .c80{color:#C1D5DA} .c81{color:#B2CCD3} .c82{color:#BFD4D9} .c83{color:#B3CCD3} .c84{color:#BED4D9}
+    .c85{color:#BED4DA} .c86{color:#C0D5DA} .c87{color:#C3DCE2} .c88{color:#C4DCE3} .c89{color:#C3DCE2}
+    .c90{color:#C2DCE2} .c91{color:#C3DCE3} .c92{color:#C5DDE4} .c93{color:#C0DAE1} .c94{color:#C6DEE4}
+    .c95{color:#C1DBE1} .c96{color:#C1DAE1} .c97{color:#C3DCE3} .c98{color:#C7DFE5} .c99{color:#BFD9E0}
+    .c100{color:#CCE1E7} .c101{color:#D7E8ED} .c102{color:#D4E5EA} .c103{color:#E5EFF3} .c104{color:#DDEBEF}
+    .c105{color:#C2DBE1} .c106{color:#C0DAE0} .c107{color:#BDD8DF} .c108{color:#BBD7DE} .c109{color:#BCD7DE}
+    .c110{color:#BFD9E0} .c111{color:#C3DBE2} .c112{color:#C1DAE1} .c113{color:#C0D9E0} .c114{color:#C3DCE2}
+    .c115{color:#C4DCE2} .c116{color:#C5DDE3} .c117{color:#C6DDE3} .c118{color:#C5DCE2} .c119{color:#C2DBE1}
+    .c120{color:#C4DCE2} .c121{color:#C3DBE1} .c122{color:#C5DCE2} .c123{color:#C6DDE3} .c124{color:#C7DEE3}
+    .c125{color:#C7DEE4} .c126{color:#C8DEE4} .c127{color:#D1E4E9} .c128{color:#D5E7EC} .c129{color:#D5E6EB}
+    .c130{color:#CFE3E8} .c131{color:#BAD6DD} .c132{color:#DBE9EE} .c133{color:#E0ECF0} .c134{color:#BFD9DF}
+    .c135{color:#D6E6EB} .c136{color:#E6EFF3} .c137{color:#DAE9ED} .c138{color:#CBE0E6} .c139{color:#E4EEF2}
+    .c140{color:#E2EDF1} .c141{color:#CADFE5} .c142{color:#D1E4E9} .c143{color:#DDEAEF} .c144{color:#EAF3F5}
+    .c145{color:#DFECF0} .c146{color:#DCEBEE} .c147{color:#FFFFFF} .c148{color:#E3EFF1} .c149{color:#F9FCFC}
+    .c150{color:#F6FAFB} .c151{color:#DDEBEE} .c152{color:#FDFEFE} .c153{color:#E9F2F4} .c154{color:#BAD6DD}
+    .c155{color:#D3E5E9} .c156{color:#D2E5E9} .c157{color:#EDF4F6} .c158{color:#F1F7F8} .c159{color:#E1EDF0}
+    .c160{color:#E2EEF1} .c161{color:#E0EDF0} .c162{color:#F0F6F7} .c163{color:#DEEBEF} .c164{color:#C5BBC1}
+    .c165{color:#C1C7CE} .c166{color:#C0C6CC} .c167{color:#BFC6CD} .c168{color:#C2CED4} .c169{color:#C2C7CD}
+    .c170{color:#C0C5CB} .c171{color:#C0CAD0} .c172{color:#C2CAD0} .c173{color:#BFC7CE} .c174{color:#C1CCD2}
+    .c175{color:#BFC5CB} .c176{color:#BCC3CA} .c177{color:#BBC2C9} .c178{color:#BCC5CB} .c179{color:#C1CBD2}
+    .c180{color:#C3C7CD} .c181{color:#BEC4CB} .c182{color:#BFCAD1} .c183{color:#C3C8CE} .c184{color:#C2C7CD}
+    .c185{color:#C5CAD0} .c186{color:#C4C8CE} .c187{color:#BDC5CC} .c188{color:#C3CBD1} .c189{color:#BAC2C9}
+    .c190{color:#C4C9CF} .c191{color:#BDC4CA} .c192{color:#C6CCD2} .c193{color:#D6DADF} .c194{color:#D5DADF}
+    .c195{color:#CACDD2} .c196{color:#BBC4CB}
+  </style>
+  <script src="main.js"></script>
+</head>
+<body>
+  <div id="app"></div>
+  <canvas id="ripple-canvas"></canvas>
+</body>
+</html>

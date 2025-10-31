@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Matrix</title>
+    <style>
+        /* body와 html의 기본 마진과 패딩을 제거하고, 화면을 꽉 채웁니다. */
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* 스크롤바가 생기지 않도록 합니다. */
+            background-color: #000; /* 배경색을 검은색으로 설정합니다. */
+        }
+        
+        /* 캔버스가 블록 요소로 표시되도록 하여 기본 여백을 제거합니다. */
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- 0과 1을 그릴 캔버스 요소 -->
+    <canvas id="matrix-canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // 캔버스 크기를 창의 전체 너비와 높이로 설정
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // 사용할 문자 (0과 1)
+        const binary = '01';
+        const fontSize = 8; // 폰트 크기 (16 -> 8로 변경)
+        
+        // (제거됨) 열 계산 및 drops 배열 초기화
+        // const columns = Math.floor(canvas.width / fontSize);
+        // const drops = [];
+        // ...
+
+        // 화면을 정적으로 채우는 함수
+        function fillScreen() {
+            // (제거됨) 애니메이션용 반투명 오버레이
+            // ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            // ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 리사이즈 시 캔버스를 깨끗하게 지웁니다.
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 2. 텍스트 색상과 폰트를 설정합니다.
+            ctx.fillStyle = '#0F0'; // 밝은 녹색
+            ctx.font = `${fontSize}px monospace`; // 고정폭 글꼴
+
+            // 3. 캔버스 전체를 순회하며 문자를 그립니다.
+            const columns = Math.floor(canvas.width / fontSize);
+            const rows = Math.floor(canvas.height / fontSize);
+
+            for (let y = 1; y <= rows; y++) {
+                for (let x = 0; x < columns; x++) {
+                    // '0' 또는 '1' 중에서 무작위로 문자를 선택
+                    const text = binary.charAt(Math.floor(Math.random() * binary.length));
+                    
+                    // (x, y) 위치에 텍스트를 그립니다.
+                    ctx.fillText(text, x * fontSize, y * fontSize);
+                }
+            }
+            
+            // (제거됨) 애니메이션 관련 로직
+        }
+
+        // (제거됨) 애니메이션 인터벌
+        // setInterval(draw, 33);
+
+        // 페이지 로드 시 화면을 한 번 채웁니다.
+        fillScreen();
+
+        // --- 반응형 처리 ---
+        // 브라우저 창 크기가 변경될 때마다 실행
+        window.addEventListener('resize', () => {
+            // 캔버스 크기를 새 창 크기에 맞게 조절
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // (제거됨) 애니메이션용 배열 초기화
+            // const newColumns = ...
+            // drops.length = 0; ...
+            
+            // 새 크기에 맞게 정적 텍스트를 다시 그립니다.
+            fillScreen();
+        });
+    </script>
+</body>
+</html>
+
+
